@@ -1,0 +1,16 @@
+name = "AoC2021"
+uuid = "10e8a67a-2997-442f-ba23-999a08daf998"
+authors = ["Jakob Nybo Nissen <jakobnybonissen@gmail.com>"]
+version = "0.1.0"
+
+[deps]
+InlineTest = "bd334432-b1e7-49c7-a2dc-dd9149e4ebd6"
+
+[compat]
+julia = "1.6"
+
+[extras]
+ReTest = "e0db7c4e-2690-44b9-bad6-7687da720f89"
+
+[targets]
+test = ["ReTest"]
