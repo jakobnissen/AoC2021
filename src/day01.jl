@@ -5,9 +5,8 @@ using ..InlineTest
 parse(io::IO) = [Base.parse(Int, line, base=10) for line in eachline(io)]
 solve(io::IO) = solve(parse(io))
 function solve(v::AbstractVector{<:Integer})
-    part1 = sum((next > prev for (prev, next) in zip(v, @view v[2:end])), init=0)
-    part2 = sum((next > prev for (prev, next) in zip(v, @view v[4:end])), init=0)
-    (part1, part2)
+	zipdiff(a, b) = sum((@inbounds b[i] > a[i] for i in eachindex(b)), init=0)
+	return (zipdiff(v, @view v[2:end]), zipdiff(v, @view v[4:end]))
 end
 
 const TEST_STRING = """199
