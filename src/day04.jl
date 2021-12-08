@@ -1,7 +1,6 @@
 module day04
 
 using ..InlineTest
-using StaticArrays: SMatrix
 
 struct BitMatrix25
     x::UInt32
@@ -16,23 +15,23 @@ function Base.getindex(b::BitMatrix25, i::Integer)
 end
 
 mutable struct Board
-    x::SMatrix{5, 5, UInt8, 25}
+    x::NTuple{25, UInt8}
     picked::BitMatrix25
 end
 
 Base.copy(b::Board) = Board(b.x, b.picked)
 
-parse_header(s::AbstractString) = [Base.parse(UInt8, s, base=10) for s in split(s, ',')]
-
 function parse(::Type{Board}, s::AbstractString)
-    mat = reduce(vcat, [Base.parse(UInt8, i, base=10) for i in split(s)]')
-    Board(SMatrix{5, 5}(mat), BitMatrix25(0))
+    splits = split(s)
+    tup = ntuple(i -> Base.parse(UInt8, splits[i], base=10), 25)
+    Board(tup, BitMatrix25(0))
 end
 
 function parse(io::IO)
     s = join([strip(s) for s in eachline(io)], '\n')
     chunks = split(s, "\n\n")
-    parse_header(first(chunks)), [parse(Board, i) for i in @view chunks[2:end]]
+    header = [Base.parse(UInt8, s, base=10) for s in split(first(chunks), ',')]
+    (header, [parse(Board, i) for i in @view chunks[2:end]])
 end
 
 function is_bingo(b::Board)

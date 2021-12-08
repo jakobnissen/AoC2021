@@ -2,13 +2,11 @@ module day08
 
 using ..InlineTest
 
-const UTF8 = Union{String, SubString{String}}
-
 struct SegmentSet
     x::UInt8
 end
 
-function parse(::Type{SegmentSet}, s::UTF8)
+function parse(::Type{SegmentSet}, s::AbstractString)
     reduce(codeunits(s), init=0x00) do x, i
         x | 0x01 << ((i - UInt8('a')) & 7)
     end |> SegmentSet
@@ -22,11 +20,10 @@ struct Record
     output::NTuple{4, SegmentSet}
 end
 
-# TODO: Optimize
-function parse(::Type{Record}, s::UTF8)
-    s1, s2 = split(s, " | ")
-    a = Tuple(sort!(map(i -> parse(SegmentSet, i), split(s1)), by=length))
-    b = Tuple(map(i -> parse(SegmentSet, i), split(s2)))
+function parse(::Type{Record}, s::AbstractString)
+    fields = split(strip(s))
+    a = ntuple(i -> parse(SegmentSet, fields[i]), 10)
+    b = ntuple(i -> parse(SegmentSet, fields[i+11]), 4)
     Record(a, b)
 end
 
@@ -36,45 +33,31 @@ solve(v::AbstractVector{Record}) = (part1(v), part2(v))
 
 function part1(v::AbstractVector{Record})
     sum(v) do record
-        sum(record.output) do set
-            length(set) in (2, 3, 4, 7)
-        end
+        sum(set -> length(set) in (2, 3, 4, 7), record.output)
     end
 end
 
 function part2(v::AbstractVector{Record})
     sum(v) do record
-        _1, _4 = record.signal[1], record.signal[3]
+        _1 = first(Iterators.filter(i -> length(i) == 2, record.signal))
+        _4 = first(Iterators.filter(i -> length(i) == 4, record.signal))
         foldl(record.output, init=0) do n, i
             L = length(i)
-            m = if L == 2
-                1
-            elseif L == 3
-                7
-            elseif L == 4
-                4
-            elseif L == 7
-                8
-            else
-                L1, L4 = length(i ∩ _1), length(i ∩ _4)
-                if L == 5
-                    if (L1, L4) == (1, 2)
-                        2
-                    elseif (L1, L4) == (2, 3)
-                        3
-                    else
+            m = L == 2 ? 1 :
+                L == 3 ? 7 :
+                L == 4 ? 4 :
+                L == 7 ? 8 : begin
+                    L1, L4 = length(i ∩ _1), length(i ∩ _4)
+                    if L == 5
+                        (L1, L4) == (1, 2) ? 2 :
+                        (L1, L4) == (2, 3) ? 3 :
                         5
-                    end
-                else
-                    if (L1, L4) == (2, 3)
-                        0
-                    elseif (L1, L4) == (1, 3)
-                        6
                     else
+                        (L1, L4) == (2, 3) ? 0 :
+                        (L1, L4) == (1, 3) ? 6 :
                         9
                     end
                 end
-            end
             10*n + m
         end
     end
