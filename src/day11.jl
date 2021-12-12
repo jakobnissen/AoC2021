@@ -11,7 +11,7 @@ function solve(M::AbstractMatrix{<:Integer})
     I = CartesianIndices(M)
     nflash_iter100 = 0
     iter_all_flash = nothing
-    @inbounds for iteration in 0:typemax(Int)
+    @inbounds for iteration in 1:typemax(Int)
         M .+= 1
         it_flash = 0
         converged = false
@@ -50,7 +50,7 @@ const TEST_STRING = """5483143223
 5283751526"""
 
 @testset "day11" begin
-    @test solve(IOBuffer(TEST_STRING)) == (7, 5)
+    @test solve(IOBuffer(TEST_STRING)) == (1656, 195)
 end
 
 end # module
